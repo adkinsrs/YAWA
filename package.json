@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "joi": "^17.6.0",
+    "vite": "^2.7.13",
+    "vue": "^3.2.29"
+  },
+  "devDependencies": {
+    "@vue/compiler-sfc": "^3.2.29"
+  }
+}
