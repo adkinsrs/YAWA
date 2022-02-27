@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import axios from 'axios'
 
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
@@ -25,9 +26,33 @@ const wordleAnswersUrl = "https://gist.githubusercontent.com/cfreshman/a03ef2cba
 // Guessable words in Wordle, excluding answer words
 const wordleAllowedUrl = "https://gist.githubusercontent.com/cfreshman/cdcdf777450c5b5301e439061d29694c/raw/de1df631b45492e0974f7affe266ec36fed736eb/wordle-allowed-guesses.txt"
 
-const wordAnswer = "steve"
+let wordAnswer: string
 const currentRound = ref(1)
-const maxRounds = 6
+const maxRounds: number = 6
+
+onMounted (() {
+
+  axios.get(wordleAnswersUrl)
+    .then(response => (console.log(response)))
+
+  axios.get(wordleAllowedUrl)
+    .then(response => (console.log(response)))
+
+  createMasterList()
+  wordAnswer = chooseRandomAnswer()
+
+});
+
+function chooseRandomAnswer() {
+  // Choose random word from answers list to serve as answer
+  return "steve"
+}
+
+function createMasterList() {
+  // Combine both wordle lists into a master list
+  return;
+}
+
 
 </script>
 
@@ -35,8 +60,8 @@ const maxRounds = 6
   <header>
   <font-awesome-icon class="clear-left" icon="question-circle" />
   <h1>YAWA</h1>
-  <font-awesome-icon class="clear-right" icon="signal" />
-  <font-awesome-icon class="clear-right" icon="cog" />
+  <!--<font-awesome-icon class="clear-right" icon="signal" />-->
+  <!--<font-awesome-icon class="clear-right" icon="cog" /> -->
   </header>
   <h2>(Yet Another Wordle App)</h2>
   <RowContainer v-for="n in 6" :key="n" :wordLen="5" :secretWord="wordAnswer"/>
