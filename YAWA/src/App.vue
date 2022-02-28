@@ -29,42 +29,49 @@ const wordleAllowedUrl = "https://gist.githubusercontent.com/cfreshman/cdcdf7774
 let wordAnswer: string
 const currentRound = ref(1)
 const maxRounds: number = 6
+const wordLen: number = 5 // Currently the master lists use 5-letter words, so best this does not change
+let allWords: Array<string>
 
-onMounted (() {
+onMounted (async () => {
 
-  axios.get(wordleAnswersUrl)
-    .then(response => (console.log(response)))
+  const wordleAnswerArray = await axios.get(wordleAnswersUrl)
+    .then(response => {return response.data.split("\n")})
+    .catch(error => console.log(error));
 
-  axios.get(wordleAllowedUrl)
-    .then(response => (console.log(response)))
+  const wordleAllowedArray = await axios.get(wordleAllowedUrl)
+    .then(response => {return response.data.split("\n")})
+    .catch(error => console.log(error));
 
-  createMasterList()
-  wordAnswer = chooseRandomAnswer()
+  allWords = createMasterArray(wordleAnswerArray, wordleAllowedArray)
+  wordAnswer = chooseRandomAnswer(wordleAnswerArray)
 
 });
 
-function chooseRandomAnswer() {
+function chooseRandomAnswer(answerArray: Array<string>) {
   // Choose random word from answers list to serve as answer
   return "steve"
+  return answerArray[Math.floor(Math.random()*answerArray.length)]
 }
 
-function createMasterList() {
+function createMasterArray(answerArray: Array<string>, allowedArray: Array<string>) {
   // Combine both wordle lists into a master list
-  return;
+  return answerArray.concat(allowedArray);
 }
 
+//TODO: Make a "You win" message
 
 </script>
 
 <template>
   <header>
-  <font-awesome-icon class="clear-left" icon="question-circle" />
+  <!--<font-awesome-icon class="clear-left" icon="question-circle" />-->
   <h1>YAWA</h1>
   <!--<font-awesome-icon class="clear-right" icon="signal" />-->
   <!--<font-awesome-icon class="clear-right" icon="cog" /> -->
   </header>
   <h2>(Yet Another Wordle App)</h2>
-  <RowContainer v-for="n in 6" :key="n" :wordLen="5" :secretWord="wordAnswer"/>
+  <RowContainer v-for="n in maxRounds" :key="n" :wordLen="wordLen" :secretWord="wordAnswer" :allWords="allWords" :disabled="n !== currentRound"/>
+  <!--<p v-if="isWinner">Congratulations you won!</p> -->
   <p v-if="currentRound > maxRounds">You have run out of guesses. The correct answer is "{{wordAnswer.toUpperCase()}}"</p>
 </template>
 

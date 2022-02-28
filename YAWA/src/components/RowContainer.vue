@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import LetterContainer from "./LetterContainer.vue"
 
-const props = defineProps<{ wordLen:number, secretWord:string }>()
+const props = defineProps<{ wordLen:number, secretWord:string, allWords:Array<string> }>()
 
 const secretWordArray = props.secretWord.split("")
 
@@ -27,13 +27,20 @@ const adjustLetterColors = computed(() => {
     }
 });
 
+const isWordValid = computed(() => {
+    // if word is not in master list of guessable words, return false
+    if (props.allWords.includes(guessedWord)) { return true }
+    return false
+});
+
 function guessWord() {
     buildGuessedWord;
     if (guessedWord.length !== props.wordLen) {return}
-    if (isWordValid()) {return}    // Also flash some red "not valid word" text
+    if (isWordValid) {return}    // Also flash some red "not valid word" text
     if (isGuessCorrect(guessedWord, props.secretWord)) {
         // Highlight all greens
-        // Return we won!
+        letterColors = letterColors.fill("G")
+        // TODO: Return we won! (emit)
         return;
     }
     // Did not win... update letter info
@@ -41,6 +48,7 @@ function guessWord() {
     eliminateCorrectLetters;
     determineIfInWord;
     adjustLetterColors;
+    // TODO: Emit round increase (which will disable current row and enable next row)
 }
 
 function isGuessCorrect(guess:string, answer:string) {
@@ -50,17 +58,11 @@ function isGuessCorrect(guess:string, answer:string) {
   return false
 }
 
-function isWordValid() {
-    // if word is not in master list of guessable words, return false
-    return true
-}
-
 // Eliminate correct letters from secret word so we can correctly count guessed letters in word, where letter frequency is not 1-to-1
 const eliminateCorrectLetters = computed(() => {
-    const secretArr = props.secretWord.toUpperCase().split('')
     for (let i = 0; i < props.wordLen; i++) {
         if (correctPosition[i]) {
-            remaining.value += secretArr[i]
+            remaining.value += secretWordArray[i]
         }
     }
 });
@@ -68,20 +70,18 @@ const eliminateCorrectLetters = computed(() => {
 // Make note if guessed letter is in correct position within the answer
 const determineCorrectPosition = computed(() => {
     const guessArr = guessedWord.toUpperCase().split('')
-    const secretArr = props.secretWord.toUpperCase().split('')
     for (let i = 0; i < props.wordLen; i++) {
-        correctPosition[i] = guessArr[i] === secretArr[i]
+        correctPosition[i] = guessArr[i] === secretWordArray[i]
     }
 });
 
 // Make note if guessed letter is in word but not in the right position
 const determineIfInWord = computed(() => {
     const guessArr = guessedWord.toUpperCase().split('')
-    const secretArr = props.secretWord.toUpperCase().split('')
     const remainingArr = remaining.value.split('')
     for (let i = 0; i < props.wordLen; i++) {
         // IF letter is in word but not in correct position...
-        if (guessArr[i] !== secretArr[i] && remainingArr.includes(guessArr[i])) {
+        if (guessArr[i] !== secretWordArray[i] && remainingArr.includes(guessArr[i])) {
             inWord[i] = true
             // Remove occurrence of letter from remaining letters,
             // so guessed letter is not double-counted in the word
@@ -104,5 +104,17 @@ const determineIfInWord = computed(() => {
 <style scoped>
 .row-container {
     margin: 5px;
+}
+
+button {
+    color: black;
+    border:  3px solid gray;
+    border-radius: 10px;
+    font-size:48px;
+    height: 50px;
+    width: 50px;
+    margin: 5px;
+    text-transform: uppercase;
+    text-align:center;
 }
 </style>
