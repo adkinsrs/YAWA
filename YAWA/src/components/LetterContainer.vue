@@ -2,30 +2,34 @@
 import { computed, ref } from 'vue'
 
 const props = defineProps<{ letterColor: string}>()
-const emits = defineEmits<{ pushLetter: string }>()
+const emit = defineEmits<{ (e: "pushLetter", value: string):void }>()
 
-let activeColor = "white"
 let letter = ref('')
 
 const adjustContainer = computed( () => {
     // Change color of letter
-    if (props.letterColor === "Y") { activeColor = "yellow" }
-    if (props.letterColor === "G") { activeColor = "green" }
+    if (props.letterColor === "Y") { return "yellow" }
+    if (props.letterColor === "G") { return "limegreen" }
+    if (props.letterColor === "N") { return "lightgrey" }
+    // Letter is not right
+    return "white"
 });
 
 // Source: https://stackoverflow.com/a/52203434
 const alphaOnly = (event:any) => {
-    const key = event.data!.toLowerCase()
+    if (!event.data) {return}
+    const key = event.data.toLowerCase()
     // If not a letter, return blank input
     if (!(key && /[a-z]/i.test(key))) {
         event.target.value = ""
     }
+    emit("pushLetter", letter.value)
 };
 
 </script>
 
 <template>
-    <input v-model="letter" @input="alphaOnly" @change="$emit('push-letter', letter)" :style="{ backgroundColor: activeColor }" type="text" maxlength="1" class="letter-container" />
+    <input v-model="letter" @input="alphaOnly" :style="{ backgroundColor: adjustContainer }" type="text" maxlength="1" class="letter-container" />
 </template>
 
 <style scoped>

@@ -3,29 +3,18 @@ import { computed, ref } from 'vue'
 import LetterContainer from "./LetterContainer.vue"
 
 const props = defineProps<{ wordLen:number, secretWord:string, allWords:Array<string> }>()
+const emit = defineEmits<{ (e: "winGame"):void }>()
 
 const secretWordArray = props.secretWord.split("")
 
-let guessedWord: string
-let guessedWordArray = new Array(5).fill("")
-let remaining = ref("")
+let guessedWordArray = new Array(props.wordLen).fill("")
+let guessedWord:string
+let remaining:string = ""
+const disabled = ref(false)
 
 let inWord = new Array(props.wordLen).fill(false)
 let correctPosition = new Array(props.wordLen).fill(false)
-let letterColors = new Array(props.wordLen).fill('')
-
-const buildGuessedWord = computed(() => {
-    // Build guessed word
-    return guessedWordArray.join("")
-});
-
-const adjustLetterColors = computed(() => {
-    // Create array to determine final color of each guessed letter
-    for (let i = 0; i < props.wordLen; i++) {
-        if (inWord[i]) { letterColors[i] = "Y"}
-        if (correctPosition[i]) { letterColors[i] = "G"}
-    }
-});
+let letterColors = ref(Array(props.wordLen).fill(''))
 
 const isWordValid = computed(() => {
     // if word is not in master list of guessable words, return false
@@ -33,22 +22,38 @@ const isWordValid = computed(() => {
     return false
 });
 
+function adjustLetterColors() {
+    // Create array to determine final color of each guessed letter
+    for (let i = 0; i < props.wordLen; i++) {
+        if (inWord[i]) { letterColors.value[i] = "Y"}
+        if (correctPosition[i]) { letterColors.value[i] = "G"}
+        if (!(inWord[i] || correctPosition[i])) {letterColors.value[i] = "N"}
+
+    }
+}
+
 function guessWord() {
-    buildGuessedWord;
+    guessedWord = buildGuessedWord();
     if (guessedWord.length !== props.wordLen) {return}
-    if (isWordValid) {return}    // Also flash some red "not valid word" text
+    disabled.value = true
+    //if (isWordValid) {return}    // Also flash some red "not valid word" text
     if (isGuessCorrect(guessedWord, props.secretWord)) {
         // Highlight all greens
-        letterColors = letterColors.fill("G")
+        letterColors.value = letterColors.value.fill("G")
         // TODO: Return we won! (emit)
         return;
     }
     // Did not win... update letter info
-    determineCorrectPosition;
-    eliminateCorrectLetters;
-    determineIfInWord;
-    adjustLetterColors;
+    determineCorrectPosition();
+    eliminateCorrectLetters();
+    determineIfInWord();
+    adjustLetterColors();
     // TODO: Emit round increase (which will disable current row and enable next row)
+}
+
+function buildGuessedWord() {
+    // Build guessed word
+    return guessedWordArray.join("")
 }
 
 function isGuessCorrect(guess:string, answer:string) {
@@ -59,26 +64,26 @@ function isGuessCorrect(guess:string, answer:string) {
 }
 
 // Eliminate correct letters from secret word so we can correctly count guessed letters in word, where letter frequency is not 1-to-1
-const eliminateCorrectLetters = computed(() => {
+function eliminateCorrectLetters() {
     for (let i = 0; i < props.wordLen; i++) {
-        if (correctPosition[i]) {
-            remaining.value += secretWordArray[i]
+        if (!(correctPosition[i])) {
+            remaining += secretWordArray[i]
         }
     }
-});
+}
 
 // Make note if guessed letter is in correct position within the answer
-const determineCorrectPosition = computed(() => {
+function determineCorrectPosition() {
     const guessArr = guessedWord.toUpperCase().split('')
     for (let i = 0; i < props.wordLen; i++) {
         correctPosition[i] = guessArr[i] === secretWordArray[i]
     }
-});
+}
 
 // Make note if guessed letter is in word but not in the right position
-const determineIfInWord = computed(() => {
+function determineIfInWord() {
     const guessArr = guessedWord.toUpperCase().split('')
-    const remainingArr = remaining.value.split('')
+    const remainingArr = remaining.split('')
     for (let i = 0; i < props.wordLen; i++) {
         // IF letter is in word but not in correct position...
         if (guessArr[i] !== secretWordArray[i] && remainingArr.includes(guessArr[i])) {
@@ -89,14 +94,14 @@ const determineIfInWord = computed(() => {
             remainingArr.splice(index, 1)
         }
     }
-    remaining.value = remainingArr.join('')
-});
+    remaining = remainingArr.join('')
+}
 
 </script>
 
 <template>
     <div class="row-container">
-        <LetterContainer @push-letter="(l) => guessedWordArray[n] = l" v-for="n in wordLen" :key="n" :letterColor="letterColors[n]" />
+        <LetterContainer @push-letter="(l) => guessedWordArray[n-1] = l" v-for="n in wordLen" :key="n" :letterColor="letterColors[n-1]" :disabled="disabled" />
         <button @click="guessWord()"><font-awesome-icon class="clear-right" icon="arrow-left" /></button>
     </div>
 </template>
@@ -107,14 +112,13 @@ const determineIfInWord = computed(() => {
 }
 
 button {
+    background-color:lightblue;
     color: black;
+    cursor: pointer;
     border:  3px solid gray;
     border-radius: 10px;
     font-size:48px;
-    height: 50px;
-    width: 50px;
     margin: 5px;
-    text-transform: uppercase;
     text-align:center;
 }
 </style>

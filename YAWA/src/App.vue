@@ -26,7 +26,7 @@ const wordleAnswersUrl = "https://gist.githubusercontent.com/cfreshman/a03ef2cba
 // Guessable words in Wordle, excluding answer words
 const wordleAllowedUrl = "https://gist.githubusercontent.com/cfreshman/cdcdf777450c5b5301e439061d29694c/raw/de1df631b45492e0974f7affe266ec36fed736eb/wordle-allowed-guesses.txt"
 
-let wordAnswer: string
+const wordAnswer = ref('')
 const currentRound = ref(1)
 const maxRounds: number = 6
 const wordLen: number = 5 // Currently the master lists use 5-letter words, so best this does not change
@@ -43,14 +43,14 @@ onMounted (async () => {
     .catch(error => console.log(error));
 
   allWords = createMasterArray(wordleAnswerArray, wordleAllowedArray)
-  wordAnswer = chooseRandomAnswer(wordleAnswerArray)
+  wordAnswer.value = chooseRandomAnswer(wordleAnswerArray)
 
 });
 
 function chooseRandomAnswer(answerArray: Array<string>) {
   // Choose random word from answers list to serve as answer
-  return "steve"
-  return answerArray[Math.floor(Math.random()*answerArray.length)]
+  return "steve".toUpperCase()
+  return answerArray[Math.floor(Math.random()*answerArray.length)].toUpperCase()
 }
 
 function createMasterArray(answerArray: Array<string>, allowedArray: Array<string>) {
