@@ -11,16 +11,18 @@ let guessedWordArray = new Array(props.wordLen).fill("")
 let guessedWord:string
 let remaining:string = ""
 const disabled = ref(false)
+const borderColor = ref("transparent")
 
 let inWord = new Array(props.wordLen).fill(false)
 let correctPosition = new Array(props.wordLen).fill(false)
 let letterColors = ref(Array(props.wordLen).fill(''))
 
-const isWordValid = computed(() => {
+function isWordValid() {
+    props.allWords.push("steve")    //TODO: Remove
     // if word is not in master list of guessable words, return false
     if (props.allWords.includes(guessedWord)) { return true }
     return false
-});
+}
 
 function adjustLetterColors() {
     // Create array to determine final color of each guessed letter
@@ -35,8 +37,12 @@ function adjustLetterColors() {
 function guessWord() {
     guessedWord = buildGuessedWord();
     if (guessedWord.length !== props.wordLen) {return}
+    if (!(isWordValid())) {
+        borderColor.value = "red"
+        return
+    }    // Also flash some red "not valid word" text
+    borderColor.value = "transparent"
     disabled.value = true
-    //if (isWordValid) {return}    // Also flash some red "not valid word" text
     if (isGuessCorrect(guessedWord, props.secretWord)) {
         // Highlight all greens
         letterColors.value = letterColors.value.fill("G")
@@ -100,14 +106,18 @@ function determineIfInWord() {
 </script>
 
 <template>
-    <div class="row-container">
+    <div class="row-container" :style="{ borderColor: borderColor }">
         <LetterContainer @push-letter="(l) => guessedWordArray[n-1] = l" v-for="n in wordLen" :key="n" :letterColor="letterColors[n-1]" :disabled="disabled" />
         <button @click="guessWord()"><font-awesome-icon class="clear-right" icon="arrow-left" /></button>
     </div>
+    <br>
 </template>
 
 <style scoped>
 .row-container {
+    border-style: solid;
+    border-width: 3px;
+    display:inline-block;
     margin: 5px;
 }
 

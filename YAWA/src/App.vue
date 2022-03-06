@@ -28,9 +28,9 @@ const wordleAllowedUrl = "https://gist.githubusercontent.com/cfreshman/cdcdf7774
 
 const wordAnswer = ref('')
 const currentRound = ref(1)
+const allWords = ref<Array<string>>([])
 const maxRounds: number = 6
 const wordLen: number = 5 // Currently the master lists use 5-letter words, so best this does not change
-let allWords: Array<string>
 
 onMounted (async () => {
 
@@ -42,7 +42,7 @@ onMounted (async () => {
     .then(response => {return response.data.split("\n")})
     .catch(error => console.log(error));
 
-  allWords = createMasterArray(wordleAnswerArray, wordleAllowedArray)
+  allWords.value = createMasterArray(wordleAnswerArray, wordleAllowedArray)
   wordAnswer.value = chooseRandomAnswer(wordleAnswerArray)
 
 });
