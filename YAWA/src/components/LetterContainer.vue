@@ -1,47 +1,77 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref } from "vue";
 
-const props = defineProps<{ letterColor: string}>()
-const emit = defineEmits<{ (e: "pushLetter", value: string):void }>()
+const props = defineProps<{ letterColor: string }>();
+const emit =
+  defineEmits<{
+    (e: "pushLetter", value: string): void;
+   (e:"focusNext"): void;
+   (e:"focusPrev"): void;
+ }>();
 
-let letter = ref('')
+const letter = ref("");
 
-const adjustContainer = computed( () => {
-    // Change color of letter
-    if (props.letterColor === "Y") { return "yellow" }
-    if (props.letterColor === "G") { return "limegreen" }
-    if (props.letterColor === "N") { return "lightgrey" }
-    // Letter is not right
-    return "white"
+const adjustContainer = computed((): string => {
+  // Change color of letter
+  if (props.letterColor === "Y") {
+    return "yellow";
+  }
+  if (props.letterColor === "G") {
+    return "limegreen";
+  }
+  if (props.letterColor === "N") {
+    return "lightgrey";
+  }
+  // Letter is not right
+  return "white";
 });
 
 // Source: https://stackoverflow.com/a/52203434
-const alphaOnly = (event:any) => {
-    if (!event.data) {return}
-    const key = event.data.toLowerCase()
-    // If not a letter, return blank input
-    if (!(key && /[a-z]/i.test(key))) {
-        event.target.value = ""
-    }
-    emit("pushLetter", letter.value)
+const alphaOnly = (event: any) => {
+  if (!event.data) {
+    return;
+  }
+  const key = event.data.toLowerCase();
+  // If not a letter, return blank input
+  if (!(key && /[a-z]/i.test(key))) {
+    event.target.value = "";
+  }
+  emit("pushLetter", letter.value);
+  emit("focusNext");
+};
+
+const clearLetter = () => {
+  letter.value = "";
+  emit("pushLetter", letter.value);
+  emit("focusPrev")
 };
 
 </script>
 
 <template>
-    <input v-model="letter" @input="alphaOnly" :style="{ backgroundColor: adjustContainer }" type="text" maxlength="1" class="letter-container" />
+  <input
+    v-model="letter"
+    @input="alphaOnly"
+    @keyup.backspace="clearLetter"
+    :style="{ backgroundColor: adjustContainer }"
+    type="text"
+    maxlength="1"
+    class="letter-container"
+  />
 </template>
 
 <style scoped>
 .letter-container {
-    color: black;
-    border:  3px solid gray;
-    border-radius: 10px;
-    font-size:48px;
-    height: 50px;
-    width: 50px;
-    margin: 5px;
-    text-transform: uppercase;
-    text-align:center;
+  color: black;
+  border: 3px solid gray;
+  border-radius: 10px;
+  font-size: 48px;
+  height: 50px;
+  width: 50px;
+  margin: 5px;
+  text-transform: uppercase;
+  text-align: center;
+  pointer-events: none; /* Disable interactivity except with keyboard - Much like real Wordle */
+  caret-color: transparent; /* Disable cursor - Much like real Wordle */
 }
 </style>
