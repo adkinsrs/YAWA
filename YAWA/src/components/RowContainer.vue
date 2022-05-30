@@ -1,156 +1,156 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import LetterContainer from "./LetterContainer.vue";
+import { ref } from "vue"
+import LetterContainer from "./LetterContainer.vue"
 
 const props =
   defineProps<{
-    wordLen: number;
-    secretWord: string;
-    allWords: Array<string>;
-    rowIndex: number;
-    isCurrentRound: boolean;
-  }>();
+    wordLen: number
+    secretWord: string
+    allWords: Array<string>
+    rowIndex: number
+    isCurrentRound: boolean
+  }>()
 const emit = defineEmits<{
-  (e: "winGame", value: boolean): void;
-  (e: "increaseRound", value: number): void;
-}>();
+  (e: "winGame", value: boolean): void
+  (e: "increaseRound", value: number): void
+}>()
 
-const guessedWordArray = new Array(props.wordLen).fill("");
-let guessedWord: string;
-let remaining: string = "";
-const letterDisabled = ref(false);
-const borderColor = ref("transparent");
+const guessedWordArray = new Array(props.wordLen).fill("")
+let guessedWord: string
+let remaining: string = ""
+const letterDisabled = ref(false)
+const borderColor = ref("transparent")
 
-let inWord = new Array(props.wordLen).fill(false);
-let correctPosition = new Array(props.wordLen).fill(false);
-let letterColors = ref(Array(props.wordLen).fill(""));
+let inWord = new Array(props.wordLen).fill(false)
+let correctPosition = new Array(props.wordLen).fill(false)
+let letterColors = ref(Array(props.wordLen).fill(""))
 
 function isWordValid() {
-  props.allWords.push("steve"); //TODO: Remove
+  props.allWords.push("steve") //TODO: Remove
   // if word is not in master list of guessable words, return false
   if (props.allWords.includes(guessedWord)) {
-    return true;
+    return true
   }
-  return false;
+  return false
 }
 
 function adjustLetterColors() {
   // Create array to determine final color of each guessed letter
   for (let i = 0; i < props.wordLen; i++) {
     if (inWord[i]) {
-      letterColors.value[i] = "Y";
+      letterColors.value[i] = "Y"
     }
     if (correctPosition[i]) {
-      letterColors.value[i] = "G";
+      letterColors.value[i] = "G"
     }
     if (!(inWord[i] || correctPosition[i])) {
-      letterColors.value[i] = "N";
+      letterColors.value[i] = "N"
     }
   }
 }
 
 function guessWord() {
-  guessedWord = buildGuessedWord();
+  guessedWord = buildGuessedWord()
   if (guessedWord.length !== props.wordLen) {
-    return;
+    return
   }
   if (!isWordValid()) {
-    borderColor.value = "red";
-    return;
+    borderColor.value = "red"
+    return
   } // Also flash some red "not valid word" text
-  borderColor.value = "transparent";
-  letterDisabled.value = true;
+  borderColor.value = "transparent"
+  letterDisabled.value = true
   if (isGuessCorrect(guessedWord, props.secretWord)) {
     // Highlight all greens
-    letterColors.value = letterColors.value.fill("G");
+    letterColors.value = letterColors.value.fill("G")
     // TODO: Return we won! (emit)
-    emit("winGame", true);
-    return;
+    emit("winGame", true)
+    return
   }
   // Did not win... update letter info
-  emit("winGame", false);
-  emit("increaseRound", 1);
+  emit("winGame", false)
+  emit("increaseRound", 1)
 
-  determineCorrectPosition();
-  eliminateCorrectLetters();
-  determineIfInWord();
-  adjustLetterColors();
+  determineCorrectPosition()
+  eliminateCorrectLetters()
+  determineIfInWord()
+  adjustLetterColors()
   // TODO: Emit round increase (which will disable current row and enable next row)
 }
 
 function buildGuessedWord() {
   // Build guessed word
-  return guessedWordArray.join("").toLowerCase();
+  return guessedWordArray.join("").toLowerCase()
 }
 
 function isGuessCorrect(guess: string, answer: string) {
   if (guess.toUpperCase() === answer.toUpperCase()) {
-    return true;
+    return true
   }
-  return false;
+  return false
 }
 
 // Eliminate correct letters from secret word so we can correctly count guessed letters in word, where letter frequency is not 1-to-1
 function eliminateCorrectLetters() {
-  const secretWordArray = props.secretWord.split(""); // For some reason I cannot make this a reactive top-level variable
+  const secretWordArray = props.secretWord.split("") // For some reason I cannot make this a reactive top-level variable
   for (let i = 0; i < props.wordLen; i++) {
     if (!correctPosition[i]) {
-      remaining += secretWordArray[i];
+      remaining += secretWordArray[i]
     }
   }
 }
 
 // Make note if guessed letter is in correct position within the answer
 function determineCorrectPosition() {
-  const guessArr = guessedWord.toUpperCase().split("");
-  const secretWordArray = props.secretWord.split(""); // For some reason I cannot make this a reactive top-level variable
+  const guessArr = guessedWord.toUpperCase().split("")
+  const secretWordArray = props.secretWord.split("") // For some reason I cannot make this a reactive top-level variable
   for (let i = 0; i < props.wordLen; i++) {
-    correctPosition[i] = guessArr[i] === secretWordArray[i];
+    correctPosition[i] = guessArr[i] === secretWordArray[i]
   }
 }
 
 // Make note if guessed letter is in word but not in the right position
 function determineIfInWord() {
-  const guessArr = guessedWord.toUpperCase().split("");
-  const remainingArr = remaining.split("");
-  const secretWordArray = props.secretWord.split(""); // For some reason I cannot make this a reactive top-level variable
+  const guessArr = guessedWord.toUpperCase().split("")
+  const remainingArr = remaining.split("")
+  const secretWordArray = props.secretWord.split("") // For some reason I cannot make this a reactive top-level variable
   for (let i = 0; i < props.wordLen; i++) {
     // IF letter is in word but not in correct position...
     if (
       guessArr[i] !== secretWordArray[i] &&
       remainingArr.includes(guessArr[i])
     ) {
-      inWord[i] = true;
+      inWord[i] = true
       // Remove occurrence of letter from remaining letters,
       // so guessed letter is not double-counted in the word
-      const index = remainingArr.indexOf(guessArr[i]);
-      remainingArr.splice(index, 1);
+      const index = remainingArr.indexOf(guessArr[i])
+      remainingArr.splice(index, 1)
     }
   }
-  remaining = remainingArr.join("");
+  remaining = remainingArr.join("")
 }
 
 function setFocusOnNextLetter(i: number) {
   // If we're at the end of the row, do nothing
   if (i === props.wordLen) {
-    return;
+    return
   }
   // If we're not at the end of the row, get focus on next letter-container by tabbing
   // NOTE: Tried to do this using template refs but had difficulty.
-  const nextRow = document.getElementsByClassName("row-container")[props.rowIndex] as HTMLElement;
-  const firstLetterContainer = nextRow.getElementsByClassName("letter-container")[i] as HTMLElement;
-  firstLetterContainer.focus();
+  const nextRow = document.getElementsByClassName("row-container")[props.rowIndex] as HTMLElement
+  const nextLetterContainer = nextRow.getElementsByClassName("letter-container")[i] as HTMLElement
+  nextLetterContainer.focus()
 }
 
 function setFocusOnPrevLetter(i: number) {
   // If we're at the beginning of the row, do nothing
-  if (i === 0) {
-    return;
+  if (i === 1) {
+    return
   }
   // If we're not at the beginning of the row, get focus on previous letter-container by tabbing
-  const prevRow = document.getElementsByClassName("row-container")[props.rowIndex] as HTMLElement;
-  const lastLetterContainer = prevRow.getElementsByClassName("letter-container")[i - 1] as HTMLElement;
-  lastLetterContainer.focus();
+  const prevRow = document.getElementsByClassName("row-container")[props.rowIndex] as HTMLElement
+  const prevLetterContainer = prevRow.getElementsByClassName("letter-container")[i - 2] as HTMLElement
+  prevLetterContainer.focus()
 }
 
 </script>

@@ -1,50 +1,53 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref } from "vue"
 
-const props = defineProps<{ letterColor: string }>();
+const props = defineProps<{ letterColor: string }>()
 const emit =
   defineEmits<{
-    (e: "pushLetter", value: string): void;
-   (e:"focusNext"): void;
-   (e:"focusPrev"): void;
- }>();
+    (e: "pushLetter", value: string): void
+   (e:"focusNext"): void
+   (e:"focusPrev"): void
+ }>()
 
-const letter = ref("");
+const letter = ref("")
 
 const adjustContainer = computed((): string => {
   // Change color of letter
   if (props.letterColor === "Y") {
-    return "yellow";
+    return "yellow"
   }
   if (props.letterColor === "G") {
-    return "limegreen";
+    return "limegreen"
   }
   if (props.letterColor === "N") {
-    return "lightgrey";
+    return "lightgrey"
   }
   // Letter is not right
-  return "white";
-});
+  return "white"
+})
 
 // Source: https://stackoverflow.com/a/52203434
 const alphaOnly = (event: any) => {
-  if (!event.data) {
-    return;
+  // Delete letter and shift tab focus to the previous letter if backspace is pressed
+  if (event.key === "Backspace") {
+    emit("pushLetter", letter.value)
+    emit("focusPrev")
+    return
   }
-  const key = event.data.toLowerCase();
+
+  if (!event.data) {
+    return
+  }
+  const key = event.data.toLowerCase()
   // If not a letter, return blank input
   if (!(key && /[a-z]/i.test(key))) {
-    event.target.value = "";
+    event.target.value = ""
+    return
   }
-  emit("pushLetter", letter.value);
-  emit("focusNext");
-};
-
-const clearLetter = () => {
-  letter.value = "";
-  emit("pushLetter", letter.value);
-  emit("focusPrev")
-};
+  // Valid letter, push to letter array and shift tab focus to the next letter
+  emit("pushLetter", letter.value)
+  emit("focusNext")
+}
 
 </script>
 
@@ -52,7 +55,7 @@ const clearLetter = () => {
   <input
     v-model="letter"
     @input="alphaOnly"
-    @keyup.backspace="clearLetter"
+    @keydown.backspace="alphaOnly"
     :style="{ backgroundColor: adjustContainer }"
     type="text"
     maxlength="1"
