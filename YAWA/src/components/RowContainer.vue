@@ -25,8 +25,7 @@ let inWord = new Array(props.wordLen).fill(false)
 let correctPosition = new Array(props.wordLen).fill(false)
 let letterColors = ref(Array(props.wordLen).fill(""))
 
-function isWordValid() {
-  props.allWords.push("steve") //TODO: Remove
+const isWordValid = () => {
   // if word is not in master list of guessable words, return false
   if (props.allWords.includes(guessedWord)) {
     return true
@@ -34,7 +33,7 @@ function isWordValid() {
   return false
 }
 
-function adjustLetterColors() {
+const adjustLetterColors = () =>{
   // Create array to determine final color of each guessed letter
   for (let i = 0; i < props.wordLen; i++) {
     if (inWord[i]) {
@@ -49,7 +48,7 @@ function adjustLetterColors() {
   }
 }
 
-function guessWord() {
+const guessWord = () => {
   guessedWord = buildGuessedWord()
   if (guessedWord.length !== props.wordLen) {
     return
@@ -78,12 +77,12 @@ function guessWord() {
   // TODO: Emit round increase (which will disable current row and enable next row)
 }
 
-function buildGuessedWord() {
+const  buildGuessedWord = () => {
   // Build guessed word
   return guessedWordArray.join("").toLowerCase()
 }
 
-function isGuessCorrect(guess: string, answer: string) {
+const isGuessCorrect = (guess: string, answer: string) => {
   if (guess.toUpperCase() === answer.toUpperCase()) {
     return true
   }
@@ -91,7 +90,7 @@ function isGuessCorrect(guess: string, answer: string) {
 }
 
 // Eliminate correct letters from secret word so we can correctly count guessed letters in word, where letter frequency is not 1-to-1
-function eliminateCorrectLetters() {
+const eliminateCorrectLetters = () => {
   const secretWordArray = props.secretWord.split("") // For some reason I cannot make this a reactive top-level variable
   for (let i = 0; i < props.wordLen; i++) {
     if (!correctPosition[i]) {
@@ -101,7 +100,7 @@ function eliminateCorrectLetters() {
 }
 
 // Make note if guessed letter is in correct position within the answer
-function determineCorrectPosition() {
+const determineCorrectPosition = () => {
   const guessArr = guessedWord.toUpperCase().split("")
   const secretWordArray = props.secretWord.split("") // For some reason I cannot make this a reactive top-level variable
   for (let i = 0; i < props.wordLen; i++) {
@@ -110,7 +109,7 @@ function determineCorrectPosition() {
 }
 
 // Make note if guessed letter is in word but not in the right position
-function determineIfInWord() {
+const determineIfInWord = () => {
   const guessArr = guessedWord.toUpperCase().split("")
   const remainingArr = remaining.split("")
   const secretWordArray = props.secretWord.split("") // For some reason I cannot make this a reactive top-level variable
@@ -130,7 +129,7 @@ function determineIfInWord() {
   remaining = remainingArr.join("")
 }
 
-function setFocusOnNextLetter(i: number) {
+const setFocusOnNextLetter = (i: number) =>{
   // If we're at the end of the row, do nothing
   if (i === props.wordLen) {
     return
@@ -142,7 +141,7 @@ function setFocusOnNextLetter(i: number) {
   nextLetterContainer.focus()
 }
 
-function setFocusOnPrevLetter(i: number) {
+const setFocusOnPrevLetter = (i: number) => {
   // If we're at the beginning of the row, do nothing
   if (i === 1) {
     return

@@ -34,6 +34,7 @@ const adjustBgColor = computed((): string => {
 // Source: https://stackoverflow.com/a/52203434
 const alphaOnly = (event: any) => {
   // Delete letter and shift tab focus to the previous letter if backspace is pressed
+  // TODO: Backspace is not deleting last letter in word
   if (event.key === "Backspace") {
     emit("pushLetter", letter.value)
     emit("focusPrev")

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue"
+import { nextTick, onMounted, ref } from "vue"
 import axios from "axios"
 
 // This starter template is using Vue 3 <script setup> SFCs
@@ -56,31 +56,33 @@ onMounted(async () => {
   firstLetterContainer.focus()
 })
 
-function chooseRandomAnswer(answerArray: Array<string>) {
+const chooseRandomAnswer = (answerArray: Array<string>) => {
   // Choose random word from answers list to serve as answer
-  return "steve".toUpperCase()
   return answerArray[
     Math.floor(Math.random() * answerArray.length)
   ].toUpperCase()
 }
 
-function increaseRound(value: number) {
-  setFocusOnNextRow()  // Do this before increasing round so indexes are correct
+const increaseRound = (value: number) => {
   currentRound.value += value
+  setFocusOnNextRow()  // Take letter-containers out of disabled state before attempting to focus.
 }
 
-function setFocusOnNextRow() {
+const setFocusOnNextRow = async () => {
   // Set focus on 1st letter-container within next row-container
   const nextRow = document.getElementsByClassName(
     "row-container")
-  [currentRound.value] as HTMLElement
+  [currentRound.value - 1] as HTMLElement
   const firstLetterContainer = nextRow.getElementsByClassName(
     "letter-container"
   )[0] as HTMLElement
+
+  // Wait for DOM to update before setting focus
+  await nextTick()
   firstLetterContainer.focus()
 }
 
-function setWinGame(value: boolean) {
+const setWinGame = (value: boolean) => {
   isWinner.value = value
 }
 
