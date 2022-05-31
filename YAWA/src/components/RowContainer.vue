@@ -168,6 +168,7 @@ function setFocusOnPrevLetter(i: number) {
       v-for="n in wordLen"
       :key="n"
       :letterColor="letterColors[n - 1]"
+      :letterIndex="n - 1"
       :disabled="!props.isCurrentRound"
 
     />

@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
 
-const props = defineProps<{ letterColor: string }>()
+const props =
+  defineProps<{
+    letterColor: string
+    letterIndex: number
+  }>()
 const emit =
   defineEmits<{
     (e: "pushLetter", value: string): void
@@ -10,8 +14,9 @@ const emit =
  }>()
 
 const letter = ref("")
+const transitionDelay = (props.letterIndex * 0.5) + 's'
 
-const adjustContainer = computed((): string => {
+const adjustBgColor = computed((): string => {
   // Change color of letter
   if (props.letterColor === "Y") {
     return "yellow"
@@ -56,7 +61,7 @@ const alphaOnly = (event: any) => {
     v-model="letter"
     @input="alphaOnly"
     @keydown.backspace="alphaOnly"
-    :style="{ backgroundColor: adjustContainer }"
+    :style="{ backgroundColor: adjustBgColor }"
     type="text"
     maxlength="1"
     class="letter-container"
@@ -76,5 +81,6 @@ const alphaOnly = (event: any) => {
   text-align: center;
   pointer-events: none; /* Disable interactivity except with keyboard - Much like real Wordle */
   caret-color: transparent; /* Disable cursor - Much like real Wordle */
+  transition: background-color 0.5s ease v-bind(transitionDelay);
 }
 </style>
