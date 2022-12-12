@@ -11,3 +11,6 @@ To serve the app:
 2. `cd YAWA/YAWA`
 3. `npm install`
 4. `npm run dev`
+
+
+*NOTE* I kind of got bored with working on this, so I sort of abandoned it. Maybe I will resume in the future...maybe not
