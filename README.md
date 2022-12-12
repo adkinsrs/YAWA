@@ -13,4 +13,4 @@ To serve the app:
 4. `npm run dev`
 
 
-*NOTE* I kind of got bored with working on this, so I sort of abandoned it. Maybe I will resume in the future...maybe not
+**NOTE** I kind of got bored with working on this, so I sort of abandoned it. Maybe I will resume in the future...maybe not
